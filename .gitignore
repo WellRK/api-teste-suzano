@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+node_modules/
+build/
+tmp/
+temp/
+dist
+coverage/
+*.log
+
+# Segredos / variáveis de ambiente (NÃO versionar)
+.env
+config/env/*.env

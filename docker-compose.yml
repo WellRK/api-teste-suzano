@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ovgs-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      # Expõe o Postgres no host (localhost:8765 → 5432 do container)
+      - '${POSTGRES_HOST_PORT}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal_network
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+
+  app:
+    build: .
+    container_name: ovgs-app
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Puxa TODAS as variáveis do .env (nenhum dado/segredo fica no compose).
+    env_file:
+      - ./.env
+    environment:
+      # Override: dentro da rede do Compose o host do banco é o nome do serviço.
+      DB_CONNECTION_STRING: postgres
+      DB_PORT: 5432
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # Aplica as migrations e roda o seed no boot, depois sobe a API.
+    command: >
+      sh -c "yarn migration:run:dev &&
+             yarn seed:dev &&
+             yarn start"
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
+
+volumes:
+  pgdata:

@@ -1,0 +1,1 @@
+pm2 start npm --name "imoveistock-api-hom" -- run "start:hom"
