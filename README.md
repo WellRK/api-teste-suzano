@@ -60,6 +60,13 @@ mantém Postgres, app e portas alinhados.
 
 Útil para desenvolvimento com hot reload e para reproduzir o fluxo de validação.
 
+> ⚠️ Diferente da Opção A (que usa o `.env` da raiz), os comandos locais com
+> `NODE_ENV=dev` (migrations, seed e a API) carregam as variáveis de
+> [`config/env/dev.env`](./config/env/dev.env). Esse arquivo é **gitignored**
+> (`config/env/*.env`), então garanta que ele exista antes de seguir — use o
+> `dev.env` versionado como referência (Postgres em `localhost:8765`, `PORT=6789`
+> e as credenciais do seed).
+
 ```bash
 # 1. Subir apenas o Postgres (porta 8765 no host)
 docker-compose up -d postgres
@@ -67,7 +74,7 @@ docker-compose up -d postgres
 # 2. Instalar dependências
 yarn
 
-# 3. Criar o schema (migrations)
+# 3. Criar o schema (migrations) — lê config/env/dev.env
 yarn migration:run:dev
 
 # 4. Popular dados base (usuário de login, tipos de transporte, itens)
